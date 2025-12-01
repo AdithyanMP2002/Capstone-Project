@@ -94,3 +94,14 @@ the-roundtable/
 - **LLM:** Google Gemini 2.0 Flash
 - **Frontend:** Streamlit
 - **Search:** Google Search (via LangChain)
+
+## 📜 Version History
+
+### V1-Local (Current)
+- **Release Date:** Dec 1, 2025
+- **Features:**
+    - Full 3-agent debate workflow (Chief, Aria, Marcus, Chair).
+    - Local data simulation (Notion/Calendar).
+    - Intelligent web search integration.
+    - Streamlit UI with "standing" animations and decision box.
+    - Robust error handling and token limits.
