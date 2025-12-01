@@ -122,11 +122,26 @@ class BoardState(TypedDict):
    ```
 
 3. **Set up credentials**
-   Create a `.env` file in the root directory:
-   ```env
-   GOOGLE_API_KEY=your_gemini_api_key_here
+   
+   Create a `.env` file in the root directory with your Google API key:
+   
+   ```bash
+   # Create .env file
+   nano .env
+   
+   # Add this content (replace with your actual API key):
+   GOOGLE_API_KEY=AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
    MAX_DEBATE_ROUNDS=3
    ```
+   
+   > **Note:** Never commit your `.env` file to GitHub! It's protected by `.gitignore`.
+   
+   **Where to get your API key:**
+   - Visit https://ai.google.dev/
+   - Sign in with your Google account
+   - Go to "Get API Key"
+   - Create a new API key for Gemini
+   - Copy it into your `.env` file
 
 4. **Run the application**
    ```bash
@@ -161,10 +176,11 @@ the-roundtable/
 │   ├── system_instructions.py  # Agent persona definitions
 │   ├── tools.py                # Notion/Calendar tool definitions
 │   ├── mock_data.py            # Simulated data for testing
-│   └── graph.py                # Alternative graph implementation
+│   └── __init__.py             # Package initialization
 ├── streamlit_app.py            # Streamlit UI with animations
 ├── requirements.txt            # Python dependencies
-├── .env.example                # Environment variables template
+├── .gitignore                  # Git ignore file (protects .env)
+├── .env                        # Your API keys (create this, not in git)
 └── README.md                   # This file
 ```
 
