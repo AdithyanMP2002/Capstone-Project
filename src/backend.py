@@ -193,7 +193,24 @@ class BoardState(TypedDict):
 
 # Agent Nodes
 async def chief_of_staff_node(state: BoardState) -> BoardState:
-    """Gather context from mock Notion data AND web search if needed."""
+    """
+    Chief of Staff Agent: Context Gathering & Intelligence
+    
+    This agent performs the critical first step of the debate:
+    1. Analyzes the user's question to determine if external web data is needed
+    2. Performs intelligent web search via Gemini when current/external info is required
+    3. Fetches relevant internal data from mock Notion workspace and Calendar
+    4. Creates a comprehensive context report for other agents to reference
+    
+    Design Decision: Using LLM to decide web search (not hardcoded rules) ensures
+    intelligent, context-aware decisions about when external data adds value.
+    
+    Args:
+        state: Current BoardState with user messages and metadata
+        
+    Returns:
+        Updated state with context_data populated and context report added to messages
+    """
     logger.info("👔 Chief of Staff gathering context...")
     
     user_messages = [msg for msg in state["messages"] if isinstance(msg, HumanMessage)]
@@ -320,7 +337,25 @@ This data is now available for analysis.""")
     return state
 
 async def visionary_node(state: BoardState) -> BoardState:
-    """Aria proposes bold solutions."""
+    """
+    Aria (Visionary Agent): Optimistic Proposal Generation
+    
+    Persona: Bold, creative, opportunity-focused
+    Temperature: 0.9 (creative) for diverse, ambitious thinking
+    
+    This agent reviews the context from Chief of Staff and proposes the most
+    ambitious, upside-focused solution. Designed to counterbalance Marcus's
+    risk-aversion by highlighting potential benefits and opportunities.
+    
+    Error Handling: If response is empty/too short, retries with simplified prompt
+    to ensure debate can continue even if LLM fails initially.
+    
+    Args:
+        state: BoardState containing user question and context data
+        
+    Returns:
+        Updated state with Aria's proposal added to message history
+    """
     logger.info("🚀 Aria (Visionary) crafting proposal...")
     
     llm = ChatGoogleGenerativeAI(
@@ -367,7 +402,27 @@ async def visionary_node(state: BoardState) -> BoardState:
     return state
 
 async def skeptic_node(state: BoardState) -> BoardState:
-    """Marcus critiques with data."""
+    """
+    Marcus (Skeptic Agent): Data-Driven Critique
+    
+    Persona: Analytical, risk-aware, constructive critic
+    Temperature: 0.3 (analytical) for focused, logical analysis
+    
+    This agent reviews Aria's proposal against REAL data from the context:
+    - Calendar conflicts and time commitments
+    - Budget constraints from project data
+    - Existing deadlines and priorities
+    
+    Design: Provides constructive criticism (not brutal rejection) by explaining
+    WHY risks exist and WHAT could be improved. Balances Aria's optimism with
+    pragmatic reality-checking.
+    
+    Args:
+        state: BoardState with Aria's proposal and context data
+        
+    Returns:
+        Updated state with Marcus's critique added to messages
+    """
     logger.info("🔍 Marcus (Skeptic) analyzing proposal...")
     
     llm = ChatGoogleGenerativeAI(
@@ -405,7 +460,29 @@ Use this REAL data to validate Aria's proposal above.
     return state
 
 async def chair_node(state: BoardState) -> BoardState:
-    """The Chair synthesizes and decides."""
+    """
+    The Chair (Moderator Agent): Synthesis & Final Decision
+    
+    Persona: Balanced, wise, decisive
+    Temperature: 0.7 (balanced) for reasoned judgment
+    
+    This agent is the final decision-maker who:
+    1. Reviews both Aria's optimistic case and Marcus's critical analysis
+    2. Weighs the data, risks, and opportunities fairly
+    3. Makes a final SUPPORT, OPPOSE, or conditional decision
+    4. Can trigger another debate round if more information is needed (max 3 rounds)
+    
+    Decision Logic:
+    - Round tracking prevents infinite loops (max MAX_DEBATE_ROUNDS)
+    - Looks for keywords "DECISION: SUPPORT" or "DECISION: OPPOSE" in response
+    - Updates state.status to signal workflow completion
+    
+    Args:
+        state: BoardState with complete debate history
+        
+    Returns:
+        Updated state with Chair's decision and updated round_count/status
+    """
     logger.info("⚖️  The Chair deliberating...")
     
     llm = ChatGoogleGenerativeAI(
@@ -460,7 +537,22 @@ Remember your instruction: Protect the user from financial ruin.
     return state
 
 def decide_next_step(state: BoardState) -> Literal["visionary", "end"]:
-    """Conditional edge logic."""
+    """
+    LangGraph Conditional Edge: Determines Workflow Path
+    
+    This function controls the debate loop by examining the current state:
+    - If debate is complete ("approved" or "max_rounds"), end workflow
+    - Otherwise, loop back to Visionary for another debate round
+    
+    Design: Implements iterative refinement pattern where ideas can be
+    challenged and improved through multiple rounds of agent discussion.
+    
+    Args:
+        state: Current BoardState with status field
+        
+    Returns:
+        "end" to terminate workflow, or "visionary" to continue debate
+    """
     status = state.get("status", "debating")
     
     if status in ["approved", "max_rounds"]:
@@ -472,7 +564,22 @@ def decide_next_step(state: BoardState) -> Literal["visionary", "end"]:
 
 # Graph Construction
 def create_roundtable_graph() -> StateGraph:
-    """Build the debate workflow."""
+    """
+    Construct the LangGraph Multi-Agent Workflow
+    
+    Architecture:
+    START → Chief of Staff → Aria → Marcus → Chair → [Conditional]
+                                ↑_________________|
+                                (if needs revision)
+    
+    Key Features:
+    - Sequential agent flow ensures proper information passing
+    - Conditional loops allow iterative debate refinement
+    - State persistence via AsyncSqliteSaver enables session recovery
+    
+    Returns:
+        Compiled StateGraph ready for execution
+    """
     graph = StateGraph(BoardState)
     
     graph.add_node("chief_of_staff", chief_of_staff_node)
