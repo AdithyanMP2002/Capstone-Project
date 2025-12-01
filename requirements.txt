@@ -1,8 +1,8 @@
 # LangGraph and LangChain Core
-langgraph>=0.2.0
+langgraph>=1.0.0
 langgraph-checkpoint-sqlite>=1.0.0
-langchain>=0.3.0
-langchain-core>=0.3.0
+langchain
+langchain-core
 
 # Google Gemini Integration
 langchain-google-genai>=2.0.0
