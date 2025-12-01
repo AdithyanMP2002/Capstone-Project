@@ -1,13 +1,19 @@
-# LangGraph and LangChain Core
+# Core LangGraph and LangChain
 langgraph==1.0.4
+langgraph-checkpoint==3.0.1
 langgraph-checkpoint-sqlite==3.0.0
-langchain
-langchain-core
+langchain==1.1.0
+langchain-core==1.1.0
+langchain-text-splitters==0.3.0
 
 # Google Gemini Integration
-langchain-google-genai>=2.0.0
-google-generativeai>=0.8.0
-google-api-core>=2.19.0
+langchain-google-genai==3.2.0
+google-ai-generativelanguage==0.9.0
+google-api-core==2.28.1
+
+# State Management
+langsmith==0.4.49
+aiosqlite==0.21.0
 
 # Model Context Protocol
 mcp==1.22.0
@@ -15,11 +21,11 @@ mcp==1.22.0
 # Retry Logic
 tenacity==8.5.0
 
-# Persistence
-aiosqlite>=0.20.0
-
-# Utilities
-python-dotenv>=1.0.0
+# Utilities  
+python-dotenv==1.2.1
 pydantic==2.12.5
-typing-extensions>=4.8.0
+pydantic_core==2.41.5
+typing-extensions==4.15.0
+
+# UI
 streamlit==1.51.0
